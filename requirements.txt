@@ -3,7 +3,7 @@ anthropic
 langchain
 langchain-community
 langchain-chroma
+langchain-text-splitters
 sentence-transformers
 chromadb
 pymupdf
-printf 'streamlit\nanthropic\nlangchain\nlangchain-community\nlangchain-chroma\nlangchain-text-splitters\nlangchain-huggingface\nsentence-transformers\nchromadb\npymupdf\n' > requirements.txt

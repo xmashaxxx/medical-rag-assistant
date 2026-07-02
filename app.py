@@ -21,7 +21,7 @@ st.set_page_config(
 try:
     from langchain_community.document_loaders import PyMuPDFLoader
     from langchain_text_splitters import RecursiveCharacterTextSplitter
-    from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_community.embeddings import HuggingFaceEmbeddings
     from langchain_chroma import Chroma
     RAG_AVAILABLE = True
 except ImportError:
