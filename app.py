@@ -243,7 +243,7 @@ max_tokens = st.sidebar.slider("Max tokens", 256, 1024, 512, 64)
  
 tab1, tab2 = st.tabs(["Ask a Question", "About This Project"])
  
-    with tab1:
+with tab1:
     # Build vector store (cached by parameters + source)
     source_id = uploaded_pdf.name if uploaded_pdf else "default"
     cache_key = f"vs_{chunk_size}_{chunk_overlap}_{source_id}"
