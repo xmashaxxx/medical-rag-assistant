@@ -81,7 +81,14 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 150) -> list[st
             chunks.append(chunk.strip())
         start += len(chunk) - overlap
     return chunks
- 
+
+@st.cache_resource
+def build_default_store():
+    """Build the default TF-IDF store once and cache it."""
+    chunks = chunk_text(DEFAULT_TEXT, 800, 100)
+    vs = TFIDFVectorStore()
+    vs.add(chunks)
+    return vs, len(chunks)
  
 def load_pdf(pdf_path: str) -> str:
     try:
@@ -236,7 +243,8 @@ max_tokens = st.sidebar.slider("Max tokens", 256, 1024, 512, 64)
  
 tab1, tab2 = st.tabs(["Ask a Question", "About This Project"])
  
-with tab1:
+ if cache_key not in st.session_state:
+    with tab1:
     # Build vector store (cached by parameters + source)
     source_id = uploaded_pdf.name if uploaded_pdf else "default"
     cache_key = f"vs_{chunk_size}_{chunk_overlap}_{source_id}"
@@ -254,13 +262,9 @@ with tab1:
                 os.unlink(tmp_path)
             source_label = uploaded_pdf.name
         else:
-            with st.spinner("Loading built-in medical knowledge base..."):
-                chunks = chunk_text(DEFAULT_TEXT, chunk_size, chunk_overlap)
-                vs = TFIDFVectorStore()
-                vs.add(chunks)
+            vs, n = build_default_store()
             source_label = "built-in demo content (sepsis, PE, RA, hypertension, endocrine)"
- 
-        st.session_state[cache_key] = (vs, len(chunks), source_label)
+            st.session_state[cache_key] = (vs, n, source_label)
  
     vs, n_chunks, source_label = st.session_state[cache_key]
     st.success(f"✅ Ready — {n_chunks} chunks indexed from **{source_label}**")
