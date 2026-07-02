@@ -243,7 +243,6 @@ max_tokens = st.sidebar.slider("Max tokens", 256, 1024, 512, 64)
  
 tab1, tab2 = st.tabs(["Ask a Question", "About This Project"])
  
- if cache_key not in st.session_state:
     with tab1:
     # Build vector store (cached by parameters + source)
     source_id = uploaded_pdf.name if uploaded_pdf else "default"
