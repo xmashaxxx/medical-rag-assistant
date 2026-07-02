@@ -244,56 +244,51 @@ max_tokens = st.sidebar.slider("Max tokens", 256, 1024, 512, 64)
 tab1, tab2 = st.tabs(["Ask a Question", "About This Project"])
  
 with tab1:
-    # Build vector store (cached by parameters + source)
-    source_id = uploaded_pdf.name if uploaded_pdf else "default"
+    if uploaded_pdf is None:
+        st.info(
+            "Upload a medical reference PDF in the sidebar to get started.\n\n"
+            "The Merck Manual was used in the original coursework. "
+            "Any medical PDF will work."
+        )
+        st.markdown("**Example questions from the coursework evaluation:**")
+        for q in [
+            "What is the protocol for managing sepsis in a critical care unit?",
+            "What are the common symptoms and treatments for pulmonary embolism?",
+            "What are the first-line options for managing rheumatoid arthritis?",
+            "What are the diagnostic steps for suspected endocrine disorders?",
+            "Can you provide the trade names of medications used for treating hypertension?",
+        ]:
+            st.markdown(f"- *{q}*")
+        st.stop()
+
+    source_id = uploaded_pdf.name
     cache_key = f"vs_{chunk_size}_{chunk_overlap}_{source_id}"
- 
+
     if cache_key not in st.session_state:
-        if uploaded_pdf is not None:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded_pdf.read())
-                tmp_path = tmp.name
-            with st.spinner(f"Indexing {uploaded_pdf.name}..."):
-                text = load_pdf(tmp_path)
-                chunks = chunk_text(text, chunk_size, chunk_overlap)
-                vs = TFIDFVectorStore()
-                vs.add(chunks)
-                os.unlink(tmp_path)
-            source_label = uploaded_pdf.name
-        else:
-            vs, n = build_default_store()
-            source_label = "built-in demo content (sepsis, PE, RA, hypertension, endocrine)"
-            st.session_state[cache_key] = (vs, n, source_label)
- 
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(uploaded_pdf.read())
+            tmp_path = tmp.name
+        with st.spinner(f"Indexing {uploaded_pdf.name}..."):
+            text = load_pdf(tmp_path)
+            chunks = chunk_text(text, chunk_size, chunk_overlap)
+            vs = TFIDFVectorStore()
+            vs.add(chunks)
+            os.unlink(tmp_path)
+        st.session_state[cache_key] = (vs, len(chunks), uploaded_pdf.name)
+
     vs, n_chunks, source_label = st.session_state[cache_key]
     st.success(f"✅ Ready — {n_chunks} chunks indexed from **{source_label}**")
- 
-    # Example question buttons
-    st.markdown("**Try these questions from the coursework evaluation:**")
-    examples = [
-        "What is the protocol for managing sepsis in a critical care unit?",
-        "What are the common symptoms and treatments for pulmonary embolism?",
-        "What are the first-line options for managing rheumatoid arthritis?",
-        "What are the diagnostic steps for suspected endocrine disorders?",
-        "Can you provide the trade names of medications used for treating hypertension?",
-    ]
-    cols = st.columns(2)
-    for i, ex in enumerate(examples):
-        if cols[i % 2].button(ex, key=f"ex_{i}", use_container_width=True):
-            st.session_state["query"] = ex
- 
+
     query = st.text_input(
         "Ask a medical question",
-        value=st.session_state.get("query", ""),
         placeholder="What is the protocol for managing sepsis?"
     )
- 
+
     if st.button("Ask", type="primary") and query:
         col1, col2 = st.columns([1, 1])
- 
         context_chunks = vs.search(query, k=top_k)
         context = "\n\n---\n\n".join(context_chunks)
- 
+
         with col1:
             st.subheader("📄 Retrieved Context")
             st.caption(f"Top {top_k} chunks · TF-IDF keyword search")
@@ -302,19 +297,15 @@ with tab1:
                     st.markdown(f"**Chunk {i}:**")
                     st.text(chunk[:400] + ("..." if len(chunk) > 400 else ""))
                     st.markdown("---")
- 
+
         with col2:
             st.subheader("🤖 Generated Answer")
-            st.caption(f"Claude Haiku · temperature={temperature} · top_p={top_p}")
+            st.caption(f"Claude Haiku · temperature={temperature}")
             with st.spinner("Generating answer..."):
-                answer = generate_answer(query, context, temperature, top_p, max_tokens, api_key)
+                answer = generate_answer(
+                    query, context, temperature, top_p, max_tokens, api_key
+                )
             st.markdown(answer)
-            st.info(
-                "**Coursework note:** The original system used semantic embeddings "
-                "(all-MiniLM-L6-v2) for retrieval. This demo uses TF-IDF keyword "
-                "search for instant loading with no dependencies. "
-                "Upload your own PDF to test with different documents."
-            )
  
 with tab2:
     st.header("About This Project")
