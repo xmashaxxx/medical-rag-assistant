@@ -62,7 +62,7 @@ Upload any medical reference PDF to use the system.
 ## Dataset
 
 See [`data/README.md`](data/README.md). The Merck Manual is proprietary and 
-not included — the app accepts any medical PDF.
+not included, but the app accepts any medical PDF.
 
 ## Connection to research_assistant
 
