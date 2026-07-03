@@ -1,8 +1,8 @@
 # Medical RAG Assistant
 
 Retrieval-Augmented Generation system for medical Q&A, built on the Merck Manual 
-of Diagnosis and Therapy. Upload any medical reference PDF and ask clinical questions 
-— the system retrieves relevant passages and generates grounded answers.
+of Diagnosis and Therapy. Upload any medical reference PDF and ask clinical questions
+the system retrieves relevant passages and generates grounded answers.
 
 ## Live Demo
 
@@ -15,7 +15,7 @@ This was my NLP/RAG coursework project, originally built in Google Colab using
 ChromaDB as the vector store and LangChain as the orchestration framework.
 
 The deployed demo replaces Llama with **Claude Haiku** as the generation backend 
-for accessibility — the full RAG pipeline (chunking, embedding, retrieval) is 
+for accessibility, the full RAG pipeline (chunking, embedding, retrieval) is 
 unchanged. This project directly preceded and informed the design of the 
 [research_assistant](https://github.com/xmashaxxx/research_assistant) agentic pipeline.
 
